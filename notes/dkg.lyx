@@ -1,0 +1,355 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{a4wide}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection*
+Parameters
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbb{G}_{1},$
+\end_inset
+
+ 
+\begin_inset Formula $\mathbb{G}_{2}$
+\end_inset
+
+ - elliptic curve points.
+\end_layout
+
+\begin_layout Itemize
+Curves are of the same order 
+\begin_inset Formula $R$
+\end_inset
+
+ [is that required?].
+\end_layout
+
+\begin_layout Itemize
+Two curve generators: 
+\begin_inset Formula $g\in\mathbb{G}_{1}$
+\end_inset
+
+, 
+\begin_inset Formula $h\in\mathbb{G}_{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z\in\mathbb{G}_{T}$
+\end_inset
+
+, where 
+\begin_inset Formula $z$
+\end_inset
+
+ is the result of pairing: 
+\begin_inset Formula $z=e\left(g,h\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Scheme
+\end_layout
+
+\begin_layout Standard
+Scalar operations assumed to be done 
+\begin_inset Formula $\mod R$
+\end_inset
+
+.
+ We are creating values for the threshold 
+\begin_inset Formula $T$
+\end_inset
+
+, total shares 
+\begin_inset Formula $N\ge T$
+\end_inset
+
+, and 
+\begin_inset Formula $\tilde{N}$
+\end_inset
+
+ key slivers [or whatever we end up calling them].
+\end_layout
+
+\begin_layout Subsubsection*
+Bob
+\end_layout
+
+\begin_layout Enumerate
+Bob creates a uniform random 
+\begin_inset Formula $s^{(b)}\in\left[1,R-1\right]$
+\end_inset
+
+.
+ That is his secret key.
+ [I assume it can't be zero]
+\end_layout
+
+\begin_layout Enumerate
+Bob creates a 
+\begin_inset Formula $p^{(b)}=s^{(b)}*h$
+\end_inset
+
+.
+ That is his public key.
+\end_layout
+
+\begin_layout Standard
+Bob publishes 
+\begin_inset Formula $p^{(b)}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Synod
+\end_layout
+
+\begin_layout Enumerate
+Each of 
+\begin_inset Formula $\tilde{N}$
+\end_inset
+
+ parties generates 
+\begin_inset Formula $T$
+\end_inset
+
+ secret random coefficients 
+\begin_inset Formula $\alpha_{t}^{(n)}\in\left[1,R-1\right]$
+\end_inset
+
+, 
+\begin_inset Formula $1\le t\le T$
+\end_inset
+
+, 
+\begin_inset Formula $1\le n\le\tilde{N}$
+\end_inset
+
+.
+ [I assume here the coefficients can't be zero either]
+\end_layout
+
+\begin_layout Enumerate
+Someone [who?] generates shared values 
+\begin_inset Formula $x_{m}\in\left[1,R-1\right]$
+\end_inset
+
+, 
+\begin_inset Formula $1\le m\le N$
+\end_inset
+
+.
+ [The same as in Umbral, these are hashes of some characteristic values,
+ including Alice's secret key - so Alice knows how to make them, and then
+ can publish a precursor allowing Bob to make them too]
+\end_layout
+
+\begin_layout Enumerate
+Each of 
+\begin_inset Formula $\tilde{N}$
+\end_inset
+
+ parties calculates 
+\begin_inset Formula $r_{m}^{(n)}=\left(\sum_{t=1}^{T}\alpha_{t}^{(n)}x_{m}^{t-1}\right)*p^{(b)}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Each of 
+\begin_inset Formula $\tilde{N}$
+\end_inset
+
+ parties calculates 
+\begin_inset Formula $p^{(n)}=\alpha_{1}^{(n)}*z$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Someone [who?] aggregates the keys: 
+\begin_inset Formula $\tilde{r}_{m}=\sum_{n=1}^{\tilde{N}}r_{m}^{(n)}$
+\end_inset
+
+, 
+\begin_inset Formula $p=\sum_{n=1}^{\tilde{N}}p^{(n)}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Enrico
+\end_layout
+
+\begin_layout Enumerate
+Enrico creates his secret and public keys: 
+\begin_inset Formula $s^{(e)}\in\left[1,R-1\right]$
+\end_inset
+
+, 
+\begin_inset Formula $p^{(e)}=s^{(e)}*g$
+\end_inset
+
+.
+ Enrico can use the secret 
+\begin_inset Formula $y=s^{(e)}*p$
+\end_inset
+
+ as a symmetric encryption key.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Ursulas
+\end_layout
+
+\begin_layout Enumerate
+Ursulas reencrypt: 
+\begin_inset Formula $c_{m}=e\left(p^{(e)},\tilde{r}_{m}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $1\le m\le N$
+\end_inset
+
+ (capsule frags).
+\end_layout
+
+\begin_layout Subsubsection*
+Bob
+\end_layout
+
+\begin_layout Enumerate
+Bob collects a set 
+\begin_inset Formula $M$
+\end_inset
+
+ of capsule frags (with 
+\begin_inset Formula $T$
+\end_inset
+
+ elements ranging from 
+\begin_inset Formula $1$
+\end_inset
+
+ to 
+\begin_inset Formula $N$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Enumerate
+Someone [who?] calculates 
+\begin_inset Formula $\lambda_{m^{\prime}}=\prod_{m\in M,\,m\ne m^{\prime}}\frac{x_{m}}{x_{m}-x_{m^{\prime}}}$
+\end_inset
+
+, 
+\begin_inset Formula $m^{\prime}\in M$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Decryption by Bob: the recovered secret is 
+\begin_inset Formula $y^{\prime}=\left(\sum_{m\in M}c_{m}\lambda_{m}\right)\frac{1}{s^{(b)}}=y$
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_body
+\end_document

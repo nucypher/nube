@@ -23,19 +23,19 @@ impl Params {
     }
 }
 
-struct SecretKey(Scalar);
+pub struct SecretKey(Scalar);
 
 impl SecretKey {
-    fn new() -> Self {
+    pub fn random() -> Self {
         Self(Scalar::random(&mut OsRng))
     }
 
-    fn public_key(&self) -> PublicKey {
+    pub fn public_key(&self) -> PublicKey {
         PublicKey::from_secret_key(self)
     }
 }
 
-struct PublicKey(G2Projective);
+pub struct PublicKey(G2Projective);
 
 impl PublicKey {
     fn from_secret_key(sk: &SecretKey) -> Self {
@@ -52,14 +52,14 @@ fn poly_eval(coeffs: &[Scalar], x: &Scalar) -> Scalar {
     result
 }
 
-struct KeySliver {
+pub struct KeySliver {
     shares: usize,
     reencryption_key_parts: Vec<G2Projective>,
     encryption_key_part: Gt,
 }
 
 impl KeySliver {
-    fn new(delegation_key: &PublicKey, threshold: usize, shares: usize) -> Self {
+    pub fn new(delegation_key: &PublicKey, threshold: usize, shares: usize) -> Self {
         // Each Ursula needs to create a random polynomial of order T-1,
         // which means obtaining T random coefficients
         let coeffs: Vec<_> = (0..threshold).map(|_| Scalar::random(&mut OsRng)).collect();
@@ -85,14 +85,14 @@ impl KeySliver {
     }
 }
 
-struct EncryptionKey(Gt);
+pub struct EncryptionKey(Gt);
 
-struct KeyFrag {
+pub struct KeyFrag {
     point: G2Projective,
     id: usize,
 }
 
-fn generate_kfrags(kslivers: &[KeySliver]) -> (Vec<KeyFrag>, EncryptionKey) {
+pub fn generate_kfrags(kslivers: &[KeySliver]) -> (Vec<KeyFrag>, EncryptionKey) {
     // Somehow, DKG Ursulas aggregate these KFragFrags to produce N KFrags
     // and the DKG encryption public key (... need a name for this as well).
     // NOTE: How do we perform this aggregation?
@@ -120,12 +120,12 @@ fn generate_kfrags(kslivers: &[KeySliver]) -> (Vec<KeyFrag>, EncryptionKey) {
     (reencryption_keys, EncryptionKey(encryption_key))
 }
 
-struct Capsule(G1Projective);
+pub struct Capsule(G1Projective);
 
 #[derive(PartialEq, Debug)]
-struct SymmetricKey(Gt);
+pub struct SymmetricKey(Gt);
 
-fn encrypt(encryption_key: &EncryptionKey) -> (Capsule, SymmetricKey) {
+pub fn encrypt(encryption_key: &EncryptionKey) -> (Capsule, SymmetricKey) {
     let params = Params::new();
     let r = Scalar::random(&mut OsRng);
     let g_r = params.g.mul(r);
@@ -133,12 +133,12 @@ fn encrypt(encryption_key: &EncryptionKey) -> (Capsule, SymmetricKey) {
     (Capsule(g_r), SymmetricKey(secret))
 }
 
-struct CapsuleFrag {
+pub struct CapsuleFrag {
     point: Gt,
     id: usize,
 }
 
-fn reencrypt(capsule: &Capsule, kfrag: &KeyFrag) -> CapsuleFrag {
+pub fn reencrypt(capsule: &Capsule, kfrag: &KeyFrag) -> CapsuleFrag {
     CapsuleFrag {
         point: pairing(&G1Affine::from(capsule.0), &G2Affine::from(kfrag.point)),
         id: kfrag.id,
@@ -157,7 +157,7 @@ fn lambda_coeff(xs: &[Scalar], i: usize) -> Option<Scalar> {
     Some(res)
 }
 
-fn decrypt(sk: &SecretKey, cfrags: &[CapsuleFrag]) -> SymmetricKey {
+pub fn decrypt(sk: &SecretKey, cfrags: &[CapsuleFrag]) -> SymmetricKey {
     // hardcoded for now
     let shared_values: Vec<_> = cfrags
         .iter()
@@ -176,34 +176,41 @@ fn decrypt(sk: &SecretKey, cfrags: &[CapsuleFrag]) -> SymmetricKey {
     SymmetricKey(combined.mul(sk.0.invert().unwrap()))
 }
 
-fn main() {
-    // Bob
-    let recipient_sk = SecretKey::new();
-    let recipient_pk = recipient_sk.public_key();
+#[cfg(test)]
+mod tests {
 
-    let threshold = 2;
-    let shares = 3;
+    use crate::{decrypt, encrypt, generate_kfrags, reencrypt, KeySliver, SecretKey};
 
-    // Let's assume there's a DKG of Ñ=4 Ursulas
-    // In this example, we're going to create KFrags for a 2-of-3 PRE (T=2, N=3)
-    let ksliver0 = KeySliver::new(&recipient_pk, threshold, shares);
-    let ksliver1 = KeySliver::new(&recipient_pk, threshold, shares);
-    let ksliver2 = KeySliver::new(&recipient_pk, threshold, shares);
-    let ksliver3 = KeySliver::new(&recipient_pk, threshold, shares);
+    #[test]
+    fn test_api() {
+        // Bob
+        let recipient_sk = SecretKey::random();
+        let recipient_pk = recipient_sk.public_key();
 
-    let (kfrags, encryption_key) = generate_kfrags(&[ksliver0, ksliver1, ksliver2, ksliver3]);
+        let threshold = 2;
+        let shares = 3;
 
-    // Now, Enrico encrypts something with the DKG encryption key
-    // For simplicity, we don't deal with messages here but only with the computation
-    // of the secret factor used to derive the symmetric key that encrypts the message
-    let (capsule, symmetric_key) = encrypt(&encryption_key);
+        // Let's assume there's a DKG of Ñ=4 Ursulas
+        // In this example, we're going to create KFrags for a 2-of-3 PRE (T=2, N=3)
+        let ksliver0 = KeySliver::new(&recipient_pk, threshold, shares);
+        let ksliver1 = KeySliver::new(&recipient_pk, threshold, shares);
+        let ksliver2 = KeySliver::new(&recipient_pk, threshold, shares);
+        let ksliver3 = KeySliver::new(&recipient_pk, threshold, shares);
 
-    let cfrag0 = reencrypt(&capsule, &kfrags[0]);
-    let _cfrag1 = reencrypt(&capsule, &kfrags[1]);
-    let cfrag2 = reencrypt(&capsule, &kfrags[2]);
+        let (kfrags, encryption_key) = generate_kfrags(&[ksliver0, ksliver1, ksliver2, ksliver3]);
 
-    // Decryption with 2 out of 3 cfrags
-    let decrypted_key = decrypt(&recipient_sk, &[cfrag0, cfrag2]);
+        // Now, Enrico encrypts something with the DKG encryption key
+        // For simplicity, we don't deal with messages here but only with the computation
+        // of the secret factor used to derive the symmetric key that encrypts the message
+        let (capsule, symmetric_key) = encrypt(&encryption_key);
 
-    assert_eq!(symmetric_key, decrypted_key);
+        let cfrag0 = reencrypt(&capsule, &kfrags[0]);
+        let _cfrag1 = reencrypt(&capsule, &kfrags[1]);
+        let cfrag2 = reencrypt(&capsule, &kfrags[2]);
+
+        // Decryption with 2 out of 3 cfrags
+        let decrypted_key = decrypt(&recipient_sk, &[cfrag0, cfrag2]);
+
+        assert_eq!(symmetric_key, decrypted_key);
+    }
 }

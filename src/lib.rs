@@ -76,7 +76,7 @@ mod tests {
         let ksliver4 = keymaker4.make_key_sliver(label, &recipient_pk, threshold, shares);
 
         // The slivers are sent back to the Author who repackages them into kfrags.
-        let kfrags = generate_kfrags(&[ksliver1, ksliver2, ksliver3, ksliver4]);
+        let kfrags = generate_kfrags(&[ksliver1, ksliver2, ksliver3, ksliver4]).unwrap();
 
         //
         // Proxies
@@ -92,7 +92,7 @@ mod tests {
         //
 
         // Recipient decryptis with 2 out of 3 cfrags
-        let decrypted_key = decrypt(&recipient_sk, &[cfrag0, cfrag2]);
+        let decrypted_key = decrypt(&recipient_sk, &[cfrag0, cfrag2]).unwrap();
 
         assert_eq!(symmetric_key, decrypted_key);
     }

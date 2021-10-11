@@ -3,10 +3,31 @@ use core::ops::Add;
 use bls12_381::{G2Projective, Gt, Scalar};
 use ff::Field;
 use rand_core::OsRng;
+use sha3::{Digest, Sha3_256};
 
 use crate::params::Params;
 use crate::recipient::RecipientPublicKey;
 use crate::utils::random_nonzero_scalar;
+
+fn hash_to_scalar(label: &[u8], index: u32) -> Scalar {
+    let mut attempt = 0u32;
+    loop {
+        let digest = Sha3_256::new()
+            .chain(attempt.to_be_bytes())
+            .chain(index.to_be_bytes())
+            .chain(label)
+            .finalize();
+
+        let maybe_scalar = Scalar::from_bytes(&digest.into()).into();
+
+        match maybe_scalar {
+            Some(scalar) => break scalar,
+            None => {
+                attempt += 1;
+            }
+        }
+    }
+}
 
 // Encapsulates a key maker's secret key.
 // Just have it for convenience for now, probably won't be a part of the final API.
@@ -29,7 +50,7 @@ impl KeyMaker {
 
     pub fn make_key_sliver(
         &self,
-        _label: &[u8],
+        label: &[u8],
         recipient_key: &RecipientPublicKey,
         threshold: usize,
         shares: usize,
@@ -37,18 +58,25 @@ impl KeyMaker {
         // Each key maker needs to create a random polynomial of order T-1,
         // with the power-0 coefficient being fixed
         // (equal to the secret key, to match the encryption key produced earlier).
-        let coeffs: Vec<_> = (1..threshold).map(|_| Scalar::random(&mut OsRng)).collect();
+        let coeffs = (1..threshold)
+            .map(|_| Scalar::random(&mut OsRng))
+            .collect::<Vec<_>>();
 
         // Generate shared values deterministically from the label
-        let shared_values: Vec<_> = (0..shares).map(|x| Scalar::from(x as u64)).collect();
+        // TODO: for now they are public, but it may be possible to use secret sharing
+        // so that only Recipient can decrypt them (since we have his key).
+        let shared_values = (0..shares)
+            .map(|index| hash_to_scalar(label, index as u32))
+            .collect::<Vec<_>>();
 
         // For the DKG process, each DKG Ursula uses the polynomial to derive N "KFrag fragments"
-        let reencryption_key_parts: Vec<_> = shared_values
+        let reencryption_key_parts = shared_values
             .iter()
             .map(|x| recipient_key.0 * poly_eval(&self.secret_key, &coeffs, x))
-            .collect();
+            .collect::<Vec<_>>();
 
         KeySliver {
+            shared_values,
             reencryption_key_parts,
         }
     }
@@ -80,5 +108,6 @@ impl Add<&EncryptionKey> for EncryptionKey {
 }
 
 pub struct KeySliver {
+    pub(crate) shared_values: Vec<Scalar>,
     pub(crate) reencryption_key_parts: Vec<G2Projective>,
 }

@@ -38,21 +38,26 @@ fn lambda_coeff(xs: &[Scalar], i: usize) -> Option<Scalar> {
     Some(res)
 }
 
-pub fn decrypt(sk: &RecipientSecretKey, cfrags: &[CapsuleFrag]) -> SymmetricKey {
-    // hardcoded for now
-    let shared_values: Vec<_> = cfrags
+pub fn decrypt(sk: &RecipientSecretKey, cfrags: &[CapsuleFrag]) -> Option<SymmetricKey> {
+    let shared_values = cfrags
         .iter()
-        .map(|cfrag| Scalar::from(cfrag.id as u64))
-        .collect();
+        .map(|cfrag| cfrag.shared_value)
+        .collect::<Vec<_>>();
 
-    let lambdas: Vec<_> = (0..shared_values.len())
+    let maybe_lambdas = (0..shared_values.len())
         .map(|idx| lambda_coeff(&shared_values, idx))
-        .collect();
+        .collect::<Vec<_>>();
+    let lambdas = maybe_lambdas.into_iter().collect::<Option<Vec<_>>>()?;
+
+    // Have to convert from subtle::CtOption here.
+    let maybe_inv_sk: Option<Scalar> = sk.0.invert().into();
+    let inv_sk = maybe_inv_sk?;
+
     let combined: Gt = lambdas
         .iter()
         .zip(cfrags.iter())
-        .map(|(lambda, cfrag)| cfrag.point * lambda.unwrap())
+        .map(|(lambda, cfrag)| cfrag.point * lambda)
         .sum();
 
-    SymmetricKey(combined * sk.0.invert().unwrap())
+    Some(SymmetricKey(combined * inv_sk))
 }

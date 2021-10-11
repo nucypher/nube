@@ -345,12 +345,15 @@ Generates shared values
 \begin_inset Formula $L$
 \end_inset
 
-.
- For example, 
+: 
 \begin_inset Formula $x_{m}=H\left(L,m\right)$
 \end_inset
 
-.
+, where 
+\begin_inset Formula $H$
+\end_inset
+
+ is a hash function.
 \end_layout
 
 \begin_layout Enumerate
@@ -363,7 +366,7 @@ Calculates
 
 \begin_layout Enumerate
 Generates 
-\begin_inset Formula $\mathrm{KeySliver}\left(r_{1}^{(n)},\dots,r_{N}^{(n)}\right)$
+\begin_inset Formula $\mathrm{KeySliver}\left(r_{1}^{(n)},\dots,r_{N}^{(n)},x_{1},\dots,x_{N}\right)$
 \end_inset
 
  and sends it to Author.
@@ -372,6 +375,14 @@ Generates
 
 \begin_layout Subsubsection*
 Author (or Publisher?)
+\end_layout
+
+\begin_layout Enumerate
+Checks that the shared values 
+\begin_inset Formula $x_{m}$
+\end_inset
+
+ in all the slivers are the same.
 \end_layout
 
 \begin_layout Enumerate
@@ -392,7 +403,7 @@ Creates
 \end_inset
 
  key frags: 
-\begin_inset Formula $\mathrm{KeyFrag}\left(r_{m}\right)$
+\begin_inset Formula $\mathrm{KeyFrag}\left(r_{m},x_{m}\right)$
 \end_inset
 
 , 
@@ -449,7 +460,7 @@ Reencrypts:
 
 \begin_layout Enumerate
 Generates 
-\begin_inset Formula $\mathrm{CapsuleFrag}\left(c_{m}\right)$
+\begin_inset Formula $\mathrm{CapsuleFrag}\left(c_{m},x_{m}\right)$
 \end_inset
 
 .
@@ -486,19 +497,6 @@ Collects a subset
 \begin_layout Enumerate
 [Verifies that the cfrags were made for his public key? Well if they aren't,
  he just can't decrypt, right?]
-\end_layout
-
-\begin_layout Enumerate
-Calculates 
-\begin_inset Formula $x_{m}$
-\end_inset
-
- deterministically based on the label 
-\begin_inset Formula $L$
-\end_inset
-
- (see above).
- [or they can be included in kfrags/cfrags?]
 \end_layout
 
 \begin_layout Enumerate

@@ -9,3 +9,4 @@ edition = "2018"
 bls12_381 = "0.6"
 rand_core = { version = "*", features = ["getrandom"] }
 ff = "*"
+sha3 = "*"

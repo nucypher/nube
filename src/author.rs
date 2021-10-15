@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use bls12_381::{G2Projective, Scalar};
 
 use crate::keymaker::KeySliver;

@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use core::ops::Add;
 
 use bls12_381::{G2Projective, Gt, Scalar};

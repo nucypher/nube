@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 use bls12_381::{G2Projective, Gt, Scalar};
 
 use crate::encryptor::SymmetricKey;

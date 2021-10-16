@@ -7,5 +7,6 @@ edition = "2018"
 
 [dependencies]
 bls12_381 = "0.6"
-rand_core = { version = "*", features = ["getrandom"] }
-ff = "*"
+rand_core = { version = "0.6", features = ["getrandom"] }
+ff = "0.11"
+sha3 = "0.9"

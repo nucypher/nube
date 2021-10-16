@@ -1,3 +1,18 @@
+//! `nube` is a Rust implementation of a proxy re-encryption algorithm
+//! with distributed key generation.
+//! See `notes/dkg.lyx` for the scheme descriptioin.
+
+// TODO: we can use this when arbitrary expressions feature is stable in MSRV.
+// It is not available in the current one (1.51), but is stable in 1.54.
+// #![doc = include_str!("../README.md")]
+
+#![doc(html_root_url = "https://docs.rs/nube")]
+#![forbid(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms, unused_qualifications)]
+#![no_std]
+
+extern crate alloc;
+
 mod author;
 mod encryptor;
 mod keymaker;
@@ -6,10 +21,10 @@ mod proxy;
 mod recipient;
 mod utils;
 
-pub use author::generate_kfrags;
-pub use encryptor::encrypt;
-pub use keymaker::KeyMaker;
-pub use proxy::reencrypt;
+pub use author::{generate_kfrags, KeyFrag};
+pub use encryptor::{encrypt, Capsule, SymmetricKey};
+pub use keymaker::{EncryptionKey, KeyMaker, KeySliver};
+pub use proxy::{reencrypt, CapsuleFrag};
 pub use recipient::{decrypt, RecipientPublicKey, RecipientSecretKey};
 
 #[cfg(test)]

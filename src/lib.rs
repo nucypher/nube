@@ -21,10 +21,10 @@ mod proxy;
 mod recipient;
 mod utils;
 
-pub use author::generate_kfrags;
-pub use encryptor::encrypt;
-pub use keymaker::KeyMaker;
-pub use proxy::reencrypt;
+pub use author::{generate_kfrags, KeyFrag};
+pub use encryptor::{encrypt, Capsule, SymmetricKey};
+pub use keymaker::{EncryptionKey, KeyMaker, KeySliver};
+pub use proxy::{reencrypt, CapsuleFrag};
 pub use recipient::{decrypt, RecipientPublicKey, RecipientSecretKey};
 
 #[cfg(test)]

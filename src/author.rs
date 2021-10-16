@@ -3,11 +3,13 @@ use bls12_381::{G2Projective, Scalar};
 
 use crate::keymaker::KeySliver;
 
+/// One of the key fragments distributed to Proxies for re-encryption.
 pub struct KeyFrag {
     pub(crate) shared_value: Scalar,
     pub(crate) point: G2Projective,
 }
 
+/// Generates key frags out of key slivers produced by [`KeyMaker`](crate::KeyMaker) instances.
 pub fn generate_kfrags(kslivers: &[KeySliver]) -> Option<Vec<KeyFrag>> {
     // Somehow, DKG Ursulas aggregate these KFragFrags to produce N KFrags
     // and the DKG encryption public key (... need a name for this as well).

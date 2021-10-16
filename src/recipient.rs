@@ -7,18 +7,22 @@ use crate::params::Params;
 use crate::proxy::CapsuleFrag;
 use crate::utils::random_nonzero_scalar;
 
+/// Message recipient's secret key.
 pub struct RecipientSecretKey(Scalar);
 
 impl RecipientSecretKey {
+    /// Generates a random secret key using the default OS RNG.
     pub fn random() -> Self {
         Self(random_nonzero_scalar())
     }
 
+    /// Returns the corresponding public key.
     pub fn public_key(&self) -> RecipientPublicKey {
         RecipientPublicKey::from_secret_key(self)
     }
 }
 
+/// Message recipient's public key.
 pub struct RecipientPublicKey(pub(crate) G2Projective);
 
 impl RecipientPublicKey {
@@ -40,6 +44,7 @@ fn lambda_coeff(xs: &[Scalar], i: usize) -> Option<Scalar> {
     Some(res)
 }
 
+/// Decrypt the re-encrypted message using `threshold` out of `shares` capsule frags.
 pub fn decrypt(sk: &RecipientSecretKey, cfrags: &[CapsuleFrag]) -> Option<SymmetricKey> {
     let shared_values = cfrags
         .iter()

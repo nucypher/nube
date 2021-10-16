@@ -1,7 +1,7 @@
 [package]
 name = "nube"
 version = "0.0.1"
-authors = ["David Nuñez <david@nucypher.com>", "Bogdan Opanchuk <bogdan@opanchuk.net>"]
+authors = ["David Núñez <david@nucypher.com>", "Bogdan Opanchuk <bogdan@opanchuk.net>"]
 edition = "2018"
 license = "GPL-3.0-only"
 description = "Implementation of a pairing-based proxy reencryption algorithm with distributed key generaton"

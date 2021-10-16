@@ -1,3 +1,11 @@
+//! `nube` is a Rust implementation of a proxy re-encryption algorithm
+//! with distributed key generation.
+//! See `notes/dkg.lyx` for the scheme descriptioin.
+
+// TODO: we can use this when arbitrary expressions feature is stable in MSRV.
+// It is not available in the current one (1.51), but is stable in 1.54.
+// #![doc = include_str!("../README.md")]
+
 #![doc(html_root_url = "https://docs.rs/nube")]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms, unused_qualifications)]
